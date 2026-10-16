@@ -22,6 +22,8 @@ public class PlayerController : MonoBehaviour
     public AudioClip sonidoSalto;
     public AudioClip sonidoMuerte;
     public AudioClip sonidoMovimiento; 
+
+    public AudioClip sonidoSlide;
     
     // NUEVO: Dos reproductores separados para que no choquen
     public AudioSource audioMovimiento;
@@ -140,6 +142,7 @@ public class PlayerController : MonoBehaviour
     }
 
     // NUEVO: Corrutina que ejecuta el Slide
+    // CORREGIDO: Corrutina que ejecuta el Slide con su sonido correspondiente
     private IEnumerator EjecutarSlide()
     {
         estaDeslizando = true;
@@ -147,6 +150,12 @@ public class PlayerController : MonoBehaviour
 
         // Activamos la animación de Slide
         if (animator != null) animator.SetTrigger("isSliding");
+
+        // NUEVO: Reproducir sonido de deslizamiento si está configurado
+        if (audioEfectos != null && sonidoSlide != null)
+        {
+            audioEfectos.PlayOneShot(sonidoSlide);
+        }
 
         // Encogemos el colisionador
         if (miColisionador != null)
@@ -241,6 +250,6 @@ public class PlayerController : MonoBehaviour
         this.enabled = false; 
 
         yield return new WaitForSeconds(2f);
-        SceneManager.LoadScene("Nivel2");
+        SceneManager.LoadScene("MenuPrincipal");
     }
 }
