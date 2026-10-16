@@ -40,6 +40,6 @@ public class MenuManager : MonoBehaviour
         yield return new WaitForSeconds(0.5f);
 
         // Ahora sí, lo mandamos al nivel
-        SceneManager.LoadScene("SampleScene");
+        SceneManager.LoadScene("NivelTutorial");
     }
 }
