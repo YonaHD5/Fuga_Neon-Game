@@ -72,6 +72,9 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
+        // Si el juego está pausado, salimos del Update y no leemos el teclado
+        if (MenuPausa.juegoPausado) return;
+        
         if (estaMuerto) return;
 
         // Si el gato se está deslizando, ignoramos el resto de los controles
