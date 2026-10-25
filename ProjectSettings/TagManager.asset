@@ -7,6 +7,7 @@ TagManager:
   - Obstaculo
   - Suelo
   - Meta
+  - plataforma
   layers:
   - Default
   - TransparentFX
