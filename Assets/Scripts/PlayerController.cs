@@ -29,7 +29,7 @@ public class PlayerController : MonoBehaviour
     public AudioClip sonidoMuerte;
     public AudioClip musicaDerrota;
     public AudioClip sonidoMovimiento; 
-    public AudioClip sonidoSlide; // Recuperamos el sonido del slide
+    public AudioClip sonidoSlide;
     
     public AudioSource audioMovimiento;
     public AudioSource audioEfectos;
@@ -44,12 +44,18 @@ public class PlayerController : MonoBehaviour
     [Header("Mecánica de Agacharse")]
     private bool estaAgachado = false; 
 
-    [Header("Ajuste de Colisionadores (Agacharse y Slide)")]
+    [Header("Ajuste de Colisionadores")]
     private BoxCollider2D miColisionador;    
     private Vector2 tamanoOriginalCollider;  
     private Vector2 offsetOriginalCollider;  
+
+    // Configuración independiente para cuando se agacha quieto
+    public Vector2 tamanoAgachadoCollider = new Vector2(1f, 0.4f); 
+    public Vector2 offsetAgachadoCollider = new Vector2(0f, -0.2f); 
+
+    // Configuración independiente para cuando hace el Slide
     public Vector2 tamanoSlideCollider = new Vector2(1f, 0.4f); 
-    public Vector2 offsetSlideCollider = new Vector2(0f, -0.3f); 
+    public Vector2 offsetSlideCollider = new Vector2(0f, -0.1f); 
 
     void Start()
     {
@@ -87,43 +93,39 @@ public class PlayerController : MonoBehaviour
         if (estaMuerto) return;
         if (Keyboard.current == null) return;
         
-        // Si está en medio de un slide, ignoramos el resto de los controles hasta que termine
         if (estaDeslizando) return; 
 
-        // DETECTAR TECLAS
         bool teclaAbajo = Keyboard.current.sKey.isPressed || Keyboard.current.downArrowKey.isPressed;
         bool teclaDerecha = Keyboard.current.dKey.isPressed || Keyboard.current.rightArrowKey.isPressed;
         bool teclaIzquierda = Keyboard.current.aKey.isPressed || Keyboard.current.leftArrowKey.isPressed;
         bool teclaLateral = teclaDerecha || teclaIzquierda;
 
-        // 1. LÓGICA DE AGACHARSE Y DESLIZAMIENTO
-        if (teclaAbajo && enSuelo)
-        {
-            if (teclaLateral && Time.time >= tiempoSiguienteSlide)
-            {
-                // Si presionó ABAJO + LADO -> SLIDE
-                if (estaAgachado) CambiarEstadoAgachado(false); // Se levanta rápido si estaba agachado
-                
-                // Aseguramos hacia dónde mira antes de deslizarse
-                if (teclaDerecha) spriteRenderer.flipX = false;
-                else if (teclaIzquierda) spriteRenderer.flipX = true;
+        // 1. SLIDE: Se activa si presiona ABAJO + un LADO al mismo tiempo
+        bool inicioSlide = (Keyboard.current.sKey.wasPressedThisFrame || Keyboard.current.downArrowKey.wasPressedThisFrame) && teclaLateral;
 
-                StartCoroutine(EjecutarSlide());
-                return;
-            }
-            else if (!teclaLateral)
-            {
-                // Si presionó SOLO ABAJO -> SE AGACHA
-                if (!estaAgachado) CambiarEstadoAgachado(true);
-            }
-        }
-        else if (estaAgachado)
+        if (inicioSlide && enSuelo && Time.time >= tiempoSiguienteSlide)
         {
-            // Si soltó la tecla abajo, se levanta
-            CambiarEstadoAgachado(false);
+            if (estaAgachado) CambiarEstadoAgachado(false); 
+            
+            if (teclaDerecha) spriteRenderer.flipX = false;
+            else if (teclaIzquierda) spriteRenderer.flipX = true;
+
+            StartCoroutine(EjecutarSlide());
+            return;
+        }
+        
+        // 2. AGACHARSE: Si mantiene presionada la flecha ABAJO sola
+        if (teclaAbajo && !teclaLateral && enSuelo)
+        {
+            if (!estaAgachado) CambiarEstadoAgachado(true);
+        }
+        // SOLO se levanta si la tecla ABAJO ya NO está presionada
+        else if (estaAgachado && (!teclaAbajo || teclaLateral))
+        {
+            CambiarEstadoAgachado(false); 
         }
 
-        // 2. SI ESTÁ AGACHADO, NO SE MUEVE
+        // 3. SI ESTÁ AGACHADO, SE QUEDA QUIETO
         if (estaAgachado)
         {
             rb.linearVelocity = new Vector2(0f, rb.linearVelocity.y);
@@ -132,7 +134,7 @@ public class PlayerController : MonoBehaviour
             return; 
         }
 
-        // 3. MOVIMIENTO NORMAL
+        // 4. MOVIMIENTO NORMAL
         float movimientoX = 0f;
         if (teclaDerecha) movimientoX = 1f;
         else if (teclaIzquierda) movimientoX = -1f;
@@ -159,7 +161,7 @@ public class PlayerController : MonoBehaviour
             }
         }
 
-        // 4. SALTO
+        // 5. SALTO
         bool intentoSalto = Keyboard.current.spaceKey.wasPressedThisFrame || Keyboard.current.upArrowKey.wasPressedThisFrame;
         
         if (intentoSalto && enSuelo)
@@ -180,26 +182,24 @@ public class PlayerController : MonoBehaviour
         animator.SetBool("isJumping", !enSuelo);
     }
 
+    
     private void CambiarEstadoAgachado(bool agachar)
     {
         estaAgachado = agachar;
 
-        if (agachar)
+        if (miColisionador != null)
         {
-            if (animator != null) animator.SetBool("isSliding", true); 
-            if (miColisionador != null)
+            if (agachar)
             {
-                miColisionador.size = tamanoSlideCollider;
-                miColisionador.offset = offsetSlideCollider;
+                miColisionador.size = tamanoAgachadoCollider;
+                miColisionador.offset = offsetAgachadoCollider;
+                if (animator != null) animator.SetBool("isSliding", true);
             }
-        }
-        else
-        {
-            if (animator != null) animator.SetBool("isSliding", false);
-            if (miColisionador != null)
+            else
             {
                 miColisionador.size = tamanoOriginalCollider;
                 miColisionador.offset = offsetOriginalCollider;
+                if (animator != null) animator.SetBool("isSliding", false);
             }
         }
     }
@@ -390,5 +390,10 @@ public class PlayerController : MonoBehaviour
         AudioListener.pause = false; 
         Time.timeScale = 1f; 
         SceneManager.LoadScene("MenuPrincipal"); 
+    }
+    public void ActualizarCheckpoint(Vector2 nuevaPosicion)
+    {
+        posicionCheckpoint = nuevaPosicion;
+        Debug.Log("¡Checkpoint guardado en: " + nuevaPosicion + "!");
     }
 }
