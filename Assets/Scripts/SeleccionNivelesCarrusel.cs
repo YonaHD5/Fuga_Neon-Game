@@ -12,7 +12,7 @@ public class SeleccionNivelesCarrusel : MonoBehaviour
     public Button botonDerecha;
 
     [Header("Escenas")]
-    public string[] nombresEscenas = { "Nivel1_Suburbios", "Nivel2" };
+    public string[] nombresEscenas = { "Nivel1_Suburbios", "Nivel2_Factory" };
     public string escenaMenuPrincipal = "MenuPrincipal";
 
     private int indiceActual = 0;
