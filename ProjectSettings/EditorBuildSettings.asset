@@ -11,5 +11,14 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/NivelTutorial.unity
     guid: 0ccf3214334bc394db59a1d6d54c35e1
+  - enabled: 1
+    path: Assets/Scenes/SeleccionNiveles.unity
+    guid: d067ebba11272244cbb2f568f3b1f63e
+  - enabled: 1
+    path: Assets/Scenes/Nivel1_Suburbios.unity
+    guid: 48517d42b68b2e04190f78f7124619c1
+  - enabled: 1
+    path: Assets/Scenes/Nivel2_Factory.unity
+    guid: 2ed88433e41c5ff488ae61274d29f555
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}

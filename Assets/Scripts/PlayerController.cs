@@ -257,6 +257,7 @@ public class PlayerController : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collider)
     {
+        // Solo inicia la corrutina al chocar con la Meta
         if (collider.gameObject.CompareTag("Meta") && !estaMuerto)
         {
             StartCoroutine(SecuenciaVictoria());
@@ -365,19 +366,25 @@ public class PlayerController : MonoBehaviour
         if (textoVidasUI != null) textoVidasUI.text = "x " + vidas.ToString();
     }
 
-    private IEnumerator SecuenciaVictoria()
+   private IEnumerator SecuenciaVictoria()
     {
-        if (textoVictoria != null) textoVictoria.SetActive(true);
-        if (audioMovimiento != null) audioMovimiento.Stop();
-        
-        rb.linearVelocity = Vector2.zero;
-        if(animator != null) animator.SetBool("isRunning", false); 
-        this.enabled = false; 
+        int monedasObtenidas = 0;
 
-        yield return new WaitForSeconds(2f);
-        SceneManager.LoadScene("MenuPrincipal");
+        // Guarda el progreso y obtiene la cantidad exacta en una sola llamada
+        if (ControladorMonedas.Instancia != null)
+        {
+            monedasObtenidas = ControladorMonedas.Instancia.GuardarMonedasAlFinalizarNivel();
+        }
+
+        // Espera un instante (usando realtime por si el tiempo se pausa)
+        yield return new WaitForSecondsRealtime(0.2f);
+
+        // Muestra el panel enviándole la cantidad que acaba de calcular
+        if (MenuVictoria.Instancia != null)
+        {
+            MenuVictoria.Instancia.MostrarMenu(monedasObtenidas);
+        }
     }
-
     public void ReiniciarNivel()
     {
         AudioListener.pause = false; 

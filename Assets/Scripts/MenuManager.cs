@@ -5,41 +5,70 @@ using System.Collections;
 
 public class MenuManager : MonoBehaviour
 {
-    public Image fondoPantalla; // Aquí va tu Panel con la ciudad
-    public CanvasGroup grupoBoton; // Aquí va el Canvas Group del botón
+    [Header("Referencias de la Interfaz")]
+    public Image fondoPantalla;       // Panel o fondo con la ciudad
+    public CanvasGroup grupoBotones;  // Canvas Group que contiene los botones del menú
+
+    [Header("Nombres de Escenas")]
+    public string escenaSeleccionNiveles = "SeleccionNiveles";
+    public string escenaTutorial = "NivelTutorial";
+    public string escenaTienda = "Tienda";
+
+    // --- Métodos públicos para los eventos OnClick ---
+
+    public void IniciarJuego()
+    {
+        StartCoroutine(TransicionCinematica(escenaSeleccionNiveles));
+    }
 
     public void IniciarTutorial()
     {
-        // Iniciamos la animación
-        StartCoroutine(TransicionCinematica());
+        StartCoroutine(TransicionCinematica(escenaTutorial));
     }
 
-    private IEnumerator TransicionCinematica()
+    public void AbrirTienda()
     {
-        // Apagamos los clics para que el jugador no le pique dos veces
-        grupoBoton.interactable = false;
+        StartCoroutine(TransicionCinematica(escenaTienda));
+    }
+
+    // --- Corrutina de Transición ---
+
+    private IEnumerator TransicionCinematica(string nombreEscena)
+    {
+        // Apagamos los clics para evitar múltiples pulsaciones
+        if (grupoBotones != null)
+        {
+            grupoBotones.interactable = false;
+        }
 
         float tiempo = 0f;
-        float duracionTransicion = 1.5f; // Durará 1.5 segundos en apagarse
-        
+        float duracionTransicion = 1.5f; // Duración en segundos
+
         while (tiempo < duracionTransicion)
         {
             tiempo += Time.deltaTime;
             float porcentaje = tiempo / duracionTransicion;
 
-            // 1. La ciudad pasa de su color normal (blanco) a negro oscuro
-            fondoPantalla.color = Color.Lerp(Color.white, Color.black, porcentaje);
-            
-            // 2. El botón desaparece suavemente (el Alpha baja de 1 a 0)
-            grupoBoton.alpha = Mathf.Lerp(1f, 0f, porcentaje);
+            // 1. La ciudad pasa de blanco a negro oscuro
+            if (fondoPantalla != null)
+            {
+                fondoPantalla.color = Color.Lerp(Color.white, Color.black, porcentaje);
+            }
 
-            yield return null; 
+            // 2. Los botones desaparecen suavemente (Alpha de 1 a 0)
+            if (grupoBotones != null)
+            {
+                grupoBotones.alpha = Mathf.Lerp(1f, 0f, porcentaje);
+            }
+
+            yield return null;
         }
 
-        // Hacemos una pausa de medio segundo extra para que el jugador admire el título a oscuras
+        // Pausa de 0.5s para apreciar la escena a oscuras
         yield return new WaitForSeconds(0.5f);
 
-        // Ahora sí, lo mandamos al nivel
-        SceneManager.LoadScene("NivelTutorial");
+        // Aseguramos que el tiempo del juego esté activo y cargamos la escena
+        Time.timeScale = 1f;
+        SceneManager.LoadScene(nombreEscena);
     }
 }
