@@ -9,6 +9,8 @@ TagManager:
   - Meta
   - plataforma
   - Pared
+  - Enemigo
+  - Proyectil
   layers:
   - Default
   - TransparentFX
