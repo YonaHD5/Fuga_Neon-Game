@@ -10,8 +10,12 @@ public class MenuVictoria : MonoBehaviour
     public GameObject panelVictoria;
     public TextMeshProUGUI textoMonedasGanadas;
 
+    [Header("Audio (Opcional)")]
+    public AudioSource musicaFondo;
+    public AudioSource musicaVictoria;
+
     [Header("Nombres de Escenas")]
-    public string nombreSiguienteEscena = "Tienda"; // o "Nivel2"
+    public string nombreSiguienteEscena = "SeleccionNiveles";
     public string nombreMenuPrincipal = "MenuPrincipal";
 
     private void Awake()
@@ -28,7 +32,7 @@ public class MenuVictoria : MonoBehaviour
 
     private void Start()
     {
-        // Aseguramos que inicie oculto al comenzar la partida
+        // Ocultar el panel automáticamente al iniciar la escena
         if (panelVictoria != null)
         {
             panelVictoria.SetActive(false);
@@ -40,7 +44,17 @@ public class MenuVictoria : MonoBehaviour
         if (panelVictoria != null)
         {
             panelVictoria.SetActive(true);
-            Time.timeScale = 0f; // Pausa el juego en segundo plano
+            Time.timeScale = 0f; // Pausa el tiempo del juego
+
+            if (musicaFondo != null && musicaFondo.isPlaying)
+            {
+                musicaFondo.Stop();
+            }
+
+            if (musicaVictoria != null)
+            {
+                musicaVictoria.Play();
+            }
 
             if (textoMonedasGanadas != null)
             {
@@ -49,16 +63,15 @@ public class MenuVictoria : MonoBehaviour
         }
     }
 
-    // Funciones para los botones de la UI
     public void BotonSiguienteNivel()
     {
-        Time.timeScale = 1f; // Despausa el tiempo antes de cambiar de escena
+        Time.timeScale = 1f; // Reanudar el tiempo
         SceneManager.LoadScene(nombreSiguienteEscena);
     }
 
     public void BotonMenuPrincipal()
     {
-        Time.timeScale = 1f;
+        Time.timeScale = 1f; // Reanudar el tiempo
         SceneManager.LoadScene(nombreMenuPrincipal);
     }
 }
